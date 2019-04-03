@@ -15,7 +15,7 @@
 #define NUM_LAPS 5
 
 //Physics
-#define ACEL 0.4
+#define ACEL 0.6
 #define DRAG 0.04
 
 //Player colors
@@ -83,22 +83,22 @@ unsigned short beeping = 0;
 
 void drawPlayer1() {
   for (unsigned short i = 0; i <= p1_pos / NUM_LEDS; i++) {
-    leds[((unsigned int)p1_pos + i) % NUM_LEDS] = C_PLAYER1;
+    leds[((unsigned int)p1_pos - i) % NUM_LEDS] = C_PLAYER1;
   }
 }
 void drawPlayer2() {
   for (unsigned short i = 0; i <= p2_pos / NUM_LEDS; i++) {
-    leds[((unsigned int)p2_pos + i) % NUM_LEDS] = C_PLAYER2;
+    leds[((unsigned int)p2_pos - i) % NUM_LEDS] = C_PLAYER2;
   }
 }
 void drawPlayer3() {
   for (unsigned short i = 0; i <= p3_pos / NUM_LEDS; i++) {
-    leds[((unsigned int)p3_pos + i) % NUM_LEDS] = C_PLAYER3;
+    leds[((unsigned int)p3_pos - i) % NUM_LEDS] = C_PLAYER3;
   }
 }
 void drawPlayer4() {
   for (unsigned short i = 0; i <= p4_pos / NUM_LEDS; i++) {
-    leds[((unsigned int)p4_pos + i) % NUM_LEDS] = C_PLAYER4;
+    leds[((unsigned int)p4_pos - i) % NUM_LEDS] = C_PLAYER4;
   }
 }
 
@@ -286,6 +286,27 @@ void showWinner() {
   }
 }
 
+void standby(){
+  //wait for all buttons to be pressed to reset the startRace
+  int pos = 0;
+  while (digitalRead(PIN_PLAYER1) || digitalRead(PIN_PLAYER2) || digitalRead(PIN_PLAYER3) || digitalRead(PIN_PLAYER4)) {
+    delay(100);
+    FastLED.clear();
+    leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
+    FastLED.show();
+  }
+  FastLED.clear();
+  leds[0] = C_PLAYER1;
+  leds[1] = C_PLAYER2;
+  leds[2] = C_PLAYER3;
+  leds[3] = C_PLAYER4;
+  FastLED.show();
+  tone(PIN_BUZZER, 500, 250);
+  delay(500);
+  tone(PIN_BUZZER, 500, 250);
+  delay(500);
+}
+
 void setup() {
   FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(leds, NUM_LEDS);
   pinMode(PIN_PLAYER1, INPUT_PULLUP);
@@ -317,29 +338,6 @@ void loop() {
   }
   noTone(PIN_BUZZER); //in case player won while beeping
   showWinner();
-
-  //wait for all buttons to be pressed to reset the startRace
-  int pos = 0;
-  while (digitalRead(PIN_PLAYER1) || digitalRead(PIN_PLAYER2) || digitalRead(PIN_PLAYER3) || digitalRead(PIN_PLAYER4)) {
-    delay(100);
-    FastLED.clear();
-    leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
-    FastLED.show();
-  }
-  FastLED.clear();
-  tone(PIN_BUZZER, 500, 250);
-  leds[0] = C_PLAYER1;
-  FastLED.show();
-  delay(100);
-  leds[1] = C_PLAYER2;
-  FastLED.show();
-  delay(100);
-  leds[2] = C_PLAYER3;
-  FastLED.show();
-  delay(100);
-  leds[3] = C_PLAYER4;
-  FastLED.show();
-  delay(200);
-  tone(PIN_BUZZER, 500, 250);
+  standby();
   delay(3000);
 }
