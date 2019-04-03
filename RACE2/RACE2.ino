@@ -15,8 +15,8 @@
 #define NUM_LAPS 5
 
 //Physics
-#define ACEL 0.2
-#define DRAG 0.02
+#define ACEL 0.4
+#define DRAG 0.04
 
 //Player colors
 #define C_PLAYER1 CRGB(255, 0, 0)
@@ -27,14 +27,43 @@
 #define BEEP_FREQUENCY 700
 #define BEEP_DURATION 5
 
+#define NOTE_G6  1568
+#define NOTE_C7  2093
+#define NOTE_E7  2637
+#define NOTE_G7  3136
+
 //Global Vars
 CRGB leds[NUM_LEDS];
 
-unsigned short win_music[] = {
-  2637, 2637, 0, 2637,
-  0, 2093, 2637, 0,
-  3136 //Add missing note plz
+//Mario main theme melody
+int melody[] = {
+  NOTE_E7, NOTE_E7, 0, NOTE_E7,
+  0, NOTE_C7, NOTE_E7, 0,
+  NOTE_G7, 0, 0,  0,
+  NOTE_G6, 0, 0, 0,
 };
+//Mario main them tempo
+int tempo[] = {
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+};
+ 
+void buzz(int targetPin, long frequency, long length) {
+  long delayValue = 1000000 / frequency / 2; // calculate the delay value between transitions
+  //// 1 second's worth of microseconds, divided by the frequency, then split in half since
+  //// there are two phases to each cycle
+  long numCycles = frequency * length / 1000; // calculate the number of cycles for proper timing
+  //// multiply frequency, which is really cycles per second, by the number of seconds to
+  //// get the total number of cycles to produce
+  for (long i = 0; i < numCycles; i++) { // for the calculated length of time...
+    digitalWrite(targetPin, HIGH); // write the buzzer pin high to push out the diaphram
+    delayMicroseconds(delayValue); // wait for the calculated delay value
+    digitalWrite(targetPin, LOW); // write the buzzer pin low to pull back the diaphram
+    delayMicroseconds(delayValue); // wait again or the calculated delay value
+  }
+}
 
 float p1_pos;
 float p2_pos;
@@ -145,7 +174,7 @@ void calculatePositions() {
   p3_pos += p3_speed;
   if ((int)p3_pos%NUM_LEDS < temp)
     beep();
-  temp = (int)p2_pos % NUM_LEDS;
+  temp = (int)p4_pos % NUM_LEDS;
   p4_pos += p4_speed;
   if ((int)p4_pos%NUM_LEDS < temp)
     beep();
@@ -205,12 +234,24 @@ void startRace() {
 }
 
 void winnerSound() {
-  unsigned short msize = sizeof(win_music) / sizeof(unsigned short);
-  for (unsigned short note = 0; note < msize; note++) {
-    tone(PIN_BUZZER, win_music[note], 220);
-    delay(250);
-  }
-  delay(250);
+ int size = sizeof(melody) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+ 
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / tempo[thisNote];
+ 
+      buzz(PIN_BUZZER, melody[thisNote], noteDuration);
+ 
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+ 
+      // stop the tone playing:
+      buzz(PIN_BUZZER, 0, noteDuration);
+    }
 }
 
 void showWinner() {
@@ -246,9 +287,7 @@ void showWinner() {
 }
 
 void setup() {
-  //init leds  Neopixel???
   FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(leds, NUM_LEDS);
-
   pinMode(PIN_PLAYER1, INPUT_PULLUP);
   pinMode(PIN_PLAYER2, INPUT_PULLUP);
   pinMode(PIN_PLAYER3, INPUT_PULLUP);
@@ -264,11 +303,11 @@ void loop() {
     calculatePositions();
     FastLED.clear();
     drawPlayers();
+    if (beeping == 0) {
+        noTone(PIN_BUZZER);
+    }
     if (beeping > 0) {
       beeping--;
-      if (beeping == 0) {
-        noTone(PIN_BUZZER);
-      }
     } else {
       FastLED.show();
     }
@@ -281,8 +320,8 @@ void loop() {
 
   //wait for all buttons to be pressed to reset the startRace
   int pos = 0;
-  while (!digitalRead(PIN_PLAYER1) && !digitalRead(PIN_PLAYER2) && !digitalRead(PIN_PLAYER3) && !digitalRead(PIN_PLAYER4)) {
-    delay(20);
+  while (digitalRead(PIN_PLAYER1) || digitalRead(PIN_PLAYER2) || digitalRead(PIN_PLAYER3) || digitalRead(PIN_PLAYER4)) {
+    delay(100);
     FastLED.clear();
     leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
     FastLED.show();
@@ -302,5 +341,5 @@ void loop() {
   FastLED.show();
   delay(200);
   tone(PIN_BUZZER, 500, 250);
-  delay(1000);
+  delay(3000);
 }
