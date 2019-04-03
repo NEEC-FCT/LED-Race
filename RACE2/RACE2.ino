@@ -31,9 +31,9 @@
 CRGB leds[NUM_LEDS];
 
 unsigned short win_music[] = {
-    2637, 2637, 0, 2637,
-    0, 2093, 2637, 0,
-    3136 //Add missing note plz
+  2637, 2637, 0, 2637,
+  0, 2093, 2637, 0,
+  3136 //Add missing note plz
 };
 
 float p1_pos;
@@ -52,289 +52,255 @@ bool p4_btn_last = false;
 
 unsigned short beeping = 0;
 
-void drawPlayer1()
-{
-    for (unsigned short i = 0; i <= p1_pos / NUM_LEDS; i++)
-    {
-        leds[((unsigned int)p1_pos + i) % NUM_LEDS] = C_PLAYER1;
-    }
+void drawPlayer1() {
+  for (unsigned short i = 0; i <= p1_pos / NUM_LEDS; i++) {
+    leds[((unsigned int)p1_pos + i) % NUM_LEDS] = C_PLAYER1;
+  }
 }
-void drawPlayer2()
-{
-    for (unsigned short i = 0; i <= p2_pos / NUM_LEDS; i++)
-    {
-        leds[((unsigned int)p2_pos + i) % NUM_LEDS] = C_PLAYER2;
-    }
+void drawPlayer2() {
+  for (unsigned short i = 0; i <= p2_pos / NUM_LEDS; i++) {
+    leds[((unsigned int)p2_pos + i) % NUM_LEDS] = C_PLAYER2;
+  }
 }
-void drawPlayer3()
-{
-    for (unsigned short i = 0; i <= p3_pos / NUM_LEDS; i++)
-    {
-        leds[((unsigned int)p3_pos + i) % NUM_LEDS] = C_PLAYER3;
-    }
+void drawPlayer3() {
+  for (unsigned short i = 0; i <= p3_pos / NUM_LEDS; i++) {
+    leds[((unsigned int)p3_pos + i) % NUM_LEDS] = C_PLAYER3;
+  }
 }
-void drawPlayer4()
-{
-    for (unsigned short i = 0; i <= p4_pos / NUM_LEDS; i++)
-    {
-        leds[((unsigned int)p4_pos + i) % NUM_LEDS] = C_PLAYER4;
-    }
+void drawPlayer4() {
+  for (unsigned short i = 0; i <= p4_pos / NUM_LEDS; i++) {
+    leds[((unsigned int)p4_pos + i) % NUM_LEDS] = C_PLAYER4;
+  }
 }
 
-void drawPlayers()
-{
-    //change draw order in order to see players in same pos
-    short currentMills = millis() % 1000; // 0 - 999
-    if (currentMills < 250)
-    {
-        drawPlayer1();
-        drawPlayer2();
-        drawPlayer3();
-        drawPlayer4();
-    }
-    else if (currentMills < 500)
-    {
-        drawPlayer2();
-        drawPlayer3();
-        drawPlayer4();
-        drawPlayer1();
-    }
-    else if (currentMills < 750)
-    {
-        drawPlayer3();
-        drawPlayer4();
-        drawPlayer1();
-        drawPlayer2();
-    }
-    else
-    {
-        drawPlayer4();
-        drawPlayer1();
-        drawPlayer2();
-        drawPlayer3();
-    }
+void drawPlayers() {
+  //change draw order in order to see players in same pos
+  short currentMills = millis() % 1000; // 0 - 999
+  if (currentMills < 250) {
+    drawPlayer1();
+    drawPlayer2();
+    drawPlayer3();
+    drawPlayer4();
+  } else if (currentMills < 500) {
+    drawPlayer2();
+    drawPlayer3();
+    drawPlayer4();
+    drawPlayer1();
+  } else if (currentMills < 750) {
+    drawPlayer3();
+    drawPlayer4();
+    drawPlayer1();
+    drawPlayer2();
+  } else {
+    drawPlayer4();
+    drawPlayer1();
+    drawPlayer2();
+    drawPlayer3();
+  }
 }
 
-void checkButtons()
-{
-    //Check if debounce is going to be needed
-    bool p1_btn = digitalRead(PIN_PLAYER1);
-    bool p2_btn = digitalRead(PIN_PLAYER2);
-    bool p3_btn = digitalRead(PIN_PLAYER3);
-    bool p4_btn = digitalRead(PIN_PLAYER4);
+void checkButtons() {
+  //Check if debounce is going to be needed
+  bool p1_btn = digitalRead(PIN_PLAYER1);
+  bool p2_btn = digitalRead(PIN_PLAYER2);
+  bool p3_btn = digitalRead(PIN_PLAYER3);
+  bool p4_btn = digitalRead(PIN_PLAYER4);
 
-    if (p1_btn_last == true && p1_btn == false)
-    {
-        p1_speed += ACEL;
-    }
-    if (p2_btn_last == true && p2_btn == false)
-    {
-        p2_speed += ACEL;
-    }
-    if (p3_btn_last == true && p3_btn == false)
-    {
-        p3_speed += ACEL;
-    }
-    if (p4_btn_last == true && p4_btn == false)
-    {
-        p4_speed += ACEL;
-    }
+  if (p1_btn_last == true && p1_btn == false) {
+    p1_speed += ACEL;
+  }
+  if (p2_btn_last == true && p2_btn == false) {
+    p2_speed += ACEL;
+  }
+  if (p3_btn_last == true && p3_btn == false) {
+    p3_speed += ACEL;
+  }
+  if (p4_btn_last == true && p4_btn == false) {
+    p4_speed += ACEL;
+  }
 
-    p1_btn_last = p1_btn;
-    p2_btn_last = p2_btn;
-    p3_btn_last = p3_btn;
-    p4_btn_last = p4_btn;
+  p1_btn_last = p1_btn;
+  p2_btn_last = p2_btn;
+  p3_btn_last = p3_btn;
+  p4_btn_last = p4_btn;
 }
 
-void applyDrag()
-{
-    p1_speed -= p1_speed * DRAG;
-    p2_speed -= p2_speed * DRAG;
-    p3_speed -= p3_speed * DRAG;
-    p4_speed -= p4_speed * DRAG;
+void applyDrag() {
+  p1_speed -= p1_speed * DRAG;
+  p2_speed -= p2_speed * DRAG;
+  p3_speed -= p3_speed * DRAG;
+  p4_speed -= p4_speed * DRAG;
 }
 
-void calculatePositions()
-{
-    p1_pos += p1_speed;
-    p2_pos += p2_speed;
-    p3_pos += p3_speed;
-    p4_pos += p4_speed;
+void calculatePositions() {
+  int temp = (int)p1_pos % NUM_LEDS;
+  p1_pos += p1_speed;
+  if ((int)p1_pos%NUM_LEDS < temp)
+    beep();
+  temp = (int)p2_pos % NUM_LEDS;
+  p2_pos += p2_speed;
+  if ((int)p2_pos%NUM_LEDS < temp)
+    beep();
+  temp = (int)p3_pos % NUM_LEDS;
+  p3_pos += p3_speed;
+  if ((int)p3_pos%NUM_LEDS < temp)
+    beep();
+  temp = (int)p2_pos % NUM_LEDS;
+  p4_pos += p4_speed;
+  if ((int)p4_pos%NUM_LEDS < temp)
+    beep();
 }
 
-bool inGame()
-{
-    int max_dist = NUM_LAPS * NUM_LEDS;
-    if (p1_pos >= max_dist || p2_pos >= max_dist || p3_pos >= max_dist || p4_pos >= max_dist)
-    {
-        return false;
-    }
-    return true;
+bool inGame() {
+  int max_dist = NUM_LAPS * NUM_LEDS;
+  if (p1_pos >= max_dist || p2_pos >= max_dist || p3_pos >= max_dist || p4_pos >= max_dist) {
+    return false;
+  }
+  return true;
 }
 
-void beep()
-{
-    tone(PIN_BUZZER, BEEP_FREQUENCY);
-    beeping = BEEP_DURATION;
+void beep() {
+  tone(PIN_BUZZER, BEEP_FREQUENCY);
+  beeping = BEEP_DURATION;
 }
 
-void startRace()
-{
-    p1_pos = 0;
-    p1_speed = 0;
-    p1_btn_last = true;
-    p2_pos = 0;
-    p2_speed = 0;
-    p2_btn_last = true;
-    p3_pos = 0;
-    p3_speed = 0;
-    p3_btn_last = true;
-    p4_pos = 0;
-    p4_speed = 0;
-    p4_btn_last = true;
+void startRace() {
+  p1_pos = 0;
+  p1_speed = 0;
+  p1_btn_last = true;
+  p2_pos = 0;
+  p2_speed = 0;
+  p2_btn_last = true;
+  p3_pos = 0;
+  p3_speed = 0;
+  p3_btn_last = true;
+  p4_pos = 0;
+  p4_speed = 0;
+  p4_btn_last = true;
 
-    FastLED.clear();
-    leds[7] = CRGB::Red;
-    leds[8] = CRGB::Red;
-    leds[9] = CRGB::Red;
-    FastLED.show();
-    tone(PIN_BUZZER, 440, 500);
-    delay(750);
+  FastLED.clear();
+  leds[7] = CRGB::Red;
+  leds[8] = CRGB::Red;
+  leds[9] = CRGB::Red;
+  FastLED.show();
+  tone(PIN_BUZZER, 440, 500);
+  delay(750);
 
-    leds[9] = CRGB::Black;
-    FastLED.show();
-    tone(PIN_BUZZER, 440, 500);
-    delay(750);
+  leds[9] = CRGB::Black;
+  FastLED.show();
+  tone(PIN_BUZZER, 440, 500);
+  delay(750);
 
-    leds[8] = CRGB::Black;
-    FastLED.show();
-    tone(PIN_BUZZER, 440, 500);
-    delay(750);
+  leds[8] = CRGB::Black;
+  FastLED.show();
+  tone(PIN_BUZZER, 440, 500);
+  delay(750);
 
-    leds[7] = CRGB::Green;
-    leds[8] = CRGB::Green;
-    leds[9] = CRGB::Green;
-    FastLED.show();
-    tone(PIN_BUZZER, 600, 750);
-    delay(750);
+  leds[7] = CRGB::Green;
+  leds[8] = CRGB::Green;
+  leds[9] = CRGB::Green;
+  FastLED.show();
+  tone(PIN_BUZZER, 600, 750);
+  delay(750);
 }
 
-void winnerSound()
-{
-    unsigned short msize = sizeof(win_music) / sizeof(unsigned short);
-    for (unsigned short note = 0; note < msize; note++)
-    {
-        tone(PIN_BUZZER, win_music[note], 220);
-        delay(250);
-    }
+void winnerSound() {
+  unsigned short msize = sizeof(win_music) / sizeof(unsigned short);
+  for (unsigned short note = 0; note < msize; note++) {
+    tone(PIN_BUZZER, win_music[note], 220);
     delay(250);
+  }
+  delay(250);
 }
 
-void showWinner()
-{
-    unsigned int max_dist = NUM_LAPS * NUM_LEDS;
-    if (p1_pos >= max_dist)
-    {
-        for (unsigned int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i] = C_PLAYER1;
-        }
-        FastLED.show();
-        winnerSound();
+void showWinner() {
+  unsigned int max_dist = NUM_LAPS * NUM_LEDS;
+  if (p1_pos >= max_dist) {
+    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = C_PLAYER1;
     }
-    if (p2_pos >= max_dist)
-    {
-        for (unsigned int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i] = C_PLAYER2;
-        }
-        FastLED.show();
-        winnerSound();
+    FastLED.show();
+    winnerSound();
+  }
+  if (p2_pos >= max_dist) {
+    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = C_PLAYER2;
     }
-    if (p3_pos >= max_dist)
-    {
-        for (unsigned int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i] = C_PLAYER3;
-        }
-        FastLED.show();
-        winnerSound();
+    FastLED.show();
+    winnerSound();
+  }
+  if (p3_pos >= max_dist) {
+    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = C_PLAYER3;
     }
-    if (p4_pos >= max_dist)
-    {
-        for (unsigned int i = 0; i < NUM_LEDS; i++)
-        {
-            leds[i] = C_PLAYER4;
-        }
-        FastLED.show();
-        winnerSound();
+    FastLED.show();
+    winnerSound();
+  }
+  if (p4_pos >= max_dist) {
+    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = C_PLAYER4;
     }
+    FastLED.show();
+    winnerSound();
+  }
 }
 
-void setup()
-{
-    //init leds  Neopixel???
-    FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(leds, NUM_LEDS);
+void setup() {
+  //init leds  Neopixel???
+  FastLED.addLeds<NEOPIXEL, PIN_LED_DATA>(leds, NUM_LEDS);
 
-    pinMode(PIN_PLAYER1, INPUT_PULLUP);
-    pinMode(PIN_PLAYER2, INPUT_PULLUP);
-    pinMode(PIN_PLAYER3, INPUT_PULLUP);
-    pinMode(PIN_PLAYER4, INPUT_PULLUP);
-    pinMode(PIN_BUZZER, OUTPUT);
+  pinMode(PIN_PLAYER1, INPUT_PULLUP);
+  pinMode(PIN_PLAYER2, INPUT_PULLUP);
+  pinMode(PIN_PLAYER3, INPUT_PULLUP);
+  pinMode(PIN_PLAYER4, INPUT_PULLUP);
+  pinMode(PIN_BUZZER, OUTPUT);
 }
 
-void loop()
-{
-    startRace();
-    while (inGame())
-    {
-        checkButtons();
-        applyDrag();
-        calculatePositions();
-        FastLED.clear();
-        drawPlayers();
-        if (beeping > 0)
-        {
-            beeping--;
-            if (beeping == 0)
-            {
-                noTone(PIN_BUZZER);
-            }
-        }
-        else
-        {
-            FastLED.show();
-        }
-
-        //small delay;
-        delay(5);
-    }
-    noTone(PIN_BUZZER); //in case player won while beeping
-    showWinner();
-
-    //wait for all buttons to be pressed to reset the startRace
-    int pos = 0;
-    while (!digitalRead(PIN_PLAYER1) && !digitalRead(PIN_PLAYER2) && !digitalRead(PIN_PLAYER3) && !digitalRead(PIN_PLAYER4))
-    {
-        delay(20);
-        FastLED.clear();
-        leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
-        FastLED.show();
-    }
+void loop() {
+  startRace();
+  while (inGame()) {
+    checkButtons();
+    applyDrag();
+    calculatePositions();
     FastLED.clear();
-    tone(PIN_BUZZER, 500, 250);
-    leds[0] = C_PLAYER1;
+    drawPlayers();
+    if (beeping > 0) {
+      beeping--;
+      if (beeping == 0) {
+        noTone(PIN_BUZZER);
+      }
+    } else {
+      FastLED.show();
+    }
+
+    //small delay;
+    delay(5);
+  }
+  noTone(PIN_BUZZER); //in case player won while beeping
+  showWinner();
+
+  //wait for all buttons to be pressed to reset the startRace
+  int pos = 0;
+  while (!digitalRead(PIN_PLAYER1) && !digitalRead(PIN_PLAYER2) && !digitalRead(PIN_PLAYER3) && !digitalRead(PIN_PLAYER4)) {
+    delay(20);
+    FastLED.clear();
+    leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
     FastLED.show();
-    delay(100);
-    leds[1] = C_PLAYER2;
-    FastLED.show();
-    delay(100);
-    leds[2] = C_PLAYER3;
-    FastLED.show();
-    delay(100);
-    leds[3] = C_PLAYER4;
-    FastLED.show();
-    delay(200);
-    tone(PIN_BUZZER, 500, 250);
-    delay(1000);
+  }
+  FastLED.clear();
+  tone(PIN_BUZZER, 500, 250);
+  leds[0] = C_PLAYER1;
+  FastLED.show();
+  delay(100);
+  leds[1] = C_PLAYER2;
+  FastLED.show();
+  delay(100);
+  leds[2] = C_PLAYER3;
+  FastLED.show();
+  delay(100);
+  leds[3] = C_PLAYER4;
+  FastLED.show();
+  delay(200);
+  tone(PIN_BUZZER, 500, 250);
+  delay(1000);
 }
