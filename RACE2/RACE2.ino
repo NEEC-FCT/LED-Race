@@ -5,10 +5,10 @@
 
 #define PIN_BUZZER 3
 
-#define PIN_PLAYER1 10
-#define PIN_PLAYER2 11
-#define PIN_PLAYER3 12
-#define PIN_PLAYER4 13
+#define PIN_PLAYER1 9
+#define PIN_PLAYER2 10
+#define PIN_PLAYER3 11
+#define PIN_PLAYER4 12
 
 //Track
 #define NUM_LEDS 300
@@ -19,8 +19,8 @@
 #define DRAG 0.04
 
 //Player colors
-#define C_PLAYER1 CRGB(255, 0, 0)
-#define C_PLAYER2 CRGB(0, 255, 0)
+#define C_PLAYER1 CRGB(0, 255, 0)
+#define C_PLAYER2 CRGB(255, 0, 0)
 #define C_PLAYER3 CRGB(0, 0, 255)
 #define C_PLAYER4 CRGB(255, 255, 0)
 
@@ -79,7 +79,7 @@ bool p2_btn_last = false;
 bool p3_btn_last = false;
 bool p4_btn_last = false;
 
-unsigned short beeping = 0;
+short beeping = 0;
 
 void drawPlayer1() {
   for (unsigned short i = 0; i <= p1_pos / NUM_LEDS; i++) {
@@ -206,6 +206,7 @@ void startRace() {
   p4_pos = 0;
   p4_speed = 0;
   p4_btn_last = true;
+  beeping = 0;
 
   FastLED.clear();
   leds[7] = CRGB::Red;
@@ -229,8 +230,8 @@ void startRace() {
   leds[8] = CRGB::Green;
   leds[9] = CRGB::Green;
   FastLED.show();
-  tone(PIN_BUZZER, 600, 750);
-  delay(750);
+  tone(PIN_BUZZER, 600, 333);
+  delay(333);
 }
 
 void winnerSound() {
@@ -257,28 +258,32 @@ void winnerSound() {
 void showWinner() {
   unsigned int max_dist = NUM_LAPS * NUM_LEDS;
   if (p1_pos >= max_dist) {
-    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+    FastLED.clear();
+    for (unsigned int i = 0; i < NUM_LEDS/15; i++) {
       leds[i] = C_PLAYER1;
     }
     FastLED.show();
     winnerSound();
   }
   if (p2_pos >= max_dist) {
-    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+    FastLED.clear();
+    for (unsigned int i = 0; i < NUM_LEDS/15; i++) {
       leds[i] = C_PLAYER2;
     }
     FastLED.show();
     winnerSound();
   }
   if (p3_pos >= max_dist) {
-    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+    FastLED.clear();
+    for (unsigned int i = 0; i < NUM_LEDS/15; i++) {
       leds[i] = C_PLAYER3;
     }
     FastLED.show();
     winnerSound();
   }
   if (p4_pos >= max_dist) {
-    for (unsigned int i = 0; i < NUM_LEDS; i++) {
+    FastLED.clear();
+    for (unsigned int i = 0; i < NUM_LEDS/15; i++) {
       leds[i] = C_PLAYER4;
     }
     FastLED.show();
@@ -317,6 +322,8 @@ void setup() {
 }
 
 void loop() {
+  standby();
+  delay(1000);
   startRace();
   while (inGame()) {
     checkButtons();
@@ -338,6 +345,4 @@ void loop() {
   }
   noTone(PIN_BUZZER); //in case player won while beeping
   showWinner();
-  standby();
-  delay(3000);
 }
