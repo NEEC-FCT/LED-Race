@@ -25,7 +25,7 @@
 #define C_PLAYER4 CRGB(255, 255, 0)
 
 #define BEEP_FREQUENCY 700
-#define BEEP_DURATION 5
+#define BEEP_DURATION 3
 
 #define NOTE_G6  1568
 #define NOTE_C7  2093
@@ -213,6 +213,8 @@ void startRace() {
   leds[8] = CRGB::Red;
   leds[9] = CRGB::Red;
   FastLED.show();
+  delay(500);
+  
   tone(PIN_BUZZER, 440, 500);
   delay(750);
 
@@ -237,20 +239,14 @@ void startRace() {
 void winnerSound() {
  int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
- 
-      // to calculate the note duration, take one second
-      // divided by the note type.
-      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       int noteDuration = 1000 / tempo[thisNote];
  
       buzz(PIN_BUZZER, melody[thisNote], noteDuration);
- 
-      // to distinguish the notes, set a minimum time between them.
-      // the note's duration + 30% seems to work well:
+      //30% to separate the notes
       int pauseBetweenNotes = noteDuration * 1.30;
       delay(pauseBetweenNotes);
  
-      // stop the tone playing:
+      // stop the tone playing aka noTone:
       buzz(PIN_BUZZER, 0, noteDuration);
     }
 }
@@ -294,22 +290,13 @@ void showWinner() {
 void standby(){
   //wait for all buttons to be pressed to reset the startRace
   int pos = 0;
-  while (digitalRead(PIN_PLAYER1) || digitalRead(PIN_PLAYER2) || digitalRead(PIN_PLAYER3) || digitalRead(PIN_PLAYER4)) {
+  while (digitalRead(PIN_PLAYER1) && digitalRead(PIN_PLAYER2) && digitalRead(PIN_PLAYER3) && digitalRead(PIN_PLAYER4)) {
     delay(100);
     FastLED.clear();
     leds[pos++ % NUM_LEDS] = CRGB(millis() % 256, micros() % 256, (pos * analogRead(1)) % 256);
     FastLED.show();
   }
   FastLED.clear();
-  leds[0] = C_PLAYER1;
-  leds[1] = C_PLAYER2;
-  leds[2] = C_PLAYER3;
-  leds[3] = C_PLAYER4;
-  FastLED.show();
-  tone(PIN_BUZZER, 500, 250);
-  delay(500);
-  tone(PIN_BUZZER, 500, 250);
-  delay(500);
 }
 
 void setup() {
@@ -323,7 +310,6 @@ void setup() {
 
 void loop() {
   standby();
-  delay(1000);
   startRace();
   while (inGame()) {
     checkButtons();
